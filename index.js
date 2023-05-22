@@ -35,7 +35,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 // scene.background = new THREE.Color("blue");
 
 let player = {
-    height: .5,
+    height: 1.80,
     turnSpeed: .1,
     speed: .1,
     jumpHeight: .4,
@@ -103,12 +103,13 @@ function setBlock(cords, type) {
     blockMat.map = texture_
     let newBox = new THREE.Mesh(blockGeometry, blockMat);
     
-    newBox.position.y = cords.y + 0.5
-    newBox.position.x = cords.x 
-    newBox.position.z = cords.z
+    // remember snap to grid
+    newBox.position.y = Number((cords.y).toFixed(0)) + 0.5; 
+    newBox.position.x = Number((cords.x).toFixed(0)); 
+    newBox.position.z = Number((cords.z).toFixed(0)); 
     newBox.receiveShadow = true;
     newBox.castShadow = true;
-
+    // console.log(`New block at : ${newBox}`)
     scene.add(newBox);
 }
 
@@ -252,7 +253,7 @@ function placeBlock() {
 }
 
 document.addEventListener('mousedown', (event) => {
-    console.log(event)
+    // console.log(event)
     if(event.buttons == '1') {
         placeBlock()
     } else if(event.buttons == '2') {

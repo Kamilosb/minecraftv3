@@ -1,17 +1,28 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
-import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-
-// document.body.appendChild
-
+import {
+    GLTFLoader
+} from 'three/addons/loaders/GLTFLoader.js';
+import {
+    FirstPersonControls
+} from 'three/addons/controls/FirstPersonControls.js';
+import {
+    PointerLockControls
+} from 'three/addons/controls/PointerLockControls.js';
+// import {
+//     GUI
+// } from 'three/addons/controls/dat.gui.js';
 
 const scene = new THREE.Scene();
 
 const textureBack = new THREE.TextureLoader().load("./assets/textures/sky.jpg");
 scene.background = textureBack
 
-// var texture = THREE.ImageUtils.loadTexture( '1.jpg' );
+
+// const gui = new GUI()
+// const camFolder = gui.addFolder('Camera')
+// camFolder.add(camera.position, 'z', 0, 10)
+// camFolder.open()
+
 const backgroundMesh = new THREE.Mesh(
     new THREE.PlaneGeometry(2, 2, 0),
     new THREE.MeshBasicMaterial({
@@ -38,32 +49,24 @@ let player = {
     height: 1.80,
     turnSpeed: .1,
     speed: .1,
-    jumpHeight: .4,
-    gravity: .01,
+    jumpHeight: .15,
+    gravity: .005,
     velocity: 0,
-    
+
     playerJumps: false
 }
 
 document.body.appendChild(renderer.domElement);
 
-// const geometry = new THREE.BoxGeometry(1, 1, 1);
-// const material = new THREE.MeshBasicMaterial({
-//     color: 0x00ff00
-// });
-// const cube = new THREE.Mesh(geometry, material);
-// scene.add(cube);
-
 const brickTexture = new THREE.TextureLoader().load("./assets/textures/bricks3.png");
 brickTexture.wrapS = THREE.RepeatWrapping;
 brickTexture.wrapT = THREE.RepeatWrapping;
-brickTexture.repeat.set( 45, 45 );
-
+brickTexture.repeat.set(45, 45);
 
 const planksTexture = new THREE.TextureLoader().load("./assets/textures/planks.png");
 planksTexture.wrapS = THREE.RepeatWrapping;
 planksTexture.wrapT = THREE.RepeatWrapping;
-planksTexture.repeat.set( 1, 1 );
+planksTexture.repeat.set(1, 1);
 
 // const fpHanlder = new FirstPersonControls(camera, renderer.domElement)
 camera.position.set(0, player.height, -5);
@@ -71,7 +74,10 @@ camera.lookAt(new THREE.Vector3(0, player.height, 0));
 
 // Object:Box1
 let BoxGeometry1 = new THREE.BoxGeometry(1, 1, 1);
-let BoxMaterial1 = new THREE.MeshBasicMaterial({ color: "blue", wireframe: false });
+let BoxMaterial1 = new THREE.MeshBasicMaterial({
+    color: "blue",
+    wireframe: false
+});
 // BoxMaterial1.map = brickTexture
 let Box1 = new THREE.Mesh(BoxGeometry1, BoxMaterial1);
 
@@ -81,7 +87,10 @@ scene.add(Box1);
 
 // Object:Box2
 let BoxGeometry2 = new THREE.BoxGeometry(1, 1, 1);
-let BoxMaterial2 = new THREE.MeshPhongMaterial({ color: "white", wireframe: false });
+let BoxMaterial2 = new THREE.MeshPhongMaterial({
+    color: "white",
+    wireframe: false
+});
 BoxMaterial2.map = planksTexture
 let Box2 = new THREE.Mesh(BoxGeometry2, BoxMaterial2);
 
@@ -92,29 +101,11 @@ Box2.castShadow = true;
 
 scene.add(Box2);
 
-function setBlock(cords, type) {
-    const texture_ = new THREE.TextureLoader().load(`./assets/textures/${type}.png`);
-    texture_.wrapS = THREE.RepeatWrapping;
-    texture_.wrapT = THREE.RepeatWrapping;
-    texture_.repeat.set( 1, 1 );
-
-    let blockGeometry = new THREE.BoxGeometry(1, 1, 1);
-    let blockMat = new THREE.MeshPhongMaterial({ color: "white", wireframe: false });
-    blockMat.map = texture_
-    let newBox = new THREE.Mesh(blockGeometry, blockMat);
-    
-    // remember snap to grid
-    newBox.position.y = Number((cords.y).toFixed(0)) + 0.5; 
-    newBox.position.x = Number((cords.x).toFixed(0)); 
-    newBox.position.z = Number((cords.z).toFixed(0)); 
-    newBox.receiveShadow = true;
-    newBox.castShadow = true;
-    // console.log(`New block at : ${newBox}`)
-    scene.add(newBox);
-}
-
 let PlaneGeometry1 = new THREE.PlaneGeometry(10, 10);
-let PlaneMaterial1 = new THREE.MeshPhongMaterial({ color: "white", wireframe: false });
+let PlaneMaterial1 = new THREE.MeshPhongMaterial({
+    color: "white",
+    wireframe: false
+});
 PlaneMaterial1.map = brickTexture
 let Plane1 = new THREE.Mesh(PlaneGeometry1, PlaneMaterial1);
 
@@ -130,109 +121,183 @@ scene.add(Plane1);
 // light1.shadow.camera.near = 2.5;
 // scene.add(light1);
 
-let light2 = new THREE.AmbientLightProbe( 'white', 0.5 );
-scene.add(light2);
+let ambientLight = new THREE.AmbientLightProbe('white', 0.5);
+scene.add(ambientLight);
 
-// let light2 = new THREE.PointLight("white", 0.9);
-// light2.position.set(0, 25, 0);
-// light2.castShadow = true;
-// light2.shadow.camera.near = 2.5;
-// scene.add(light2);
 
 //controls
 let controls = {};
-document.addEventListener('keydown', ({ key }) => { controls[key] = true });
-document.addEventListener('keyup', ({ key }) => { controls[key] = false });
+document.addEventListener('keydown', ({
+    key
+}) => {
+    controls[key] = true
+});
+document.addEventListener('keyup', ({
+    key
+}) => {
+    controls[key] = false
+});
 
-// document.addEventListener('mousemove', (event) => {
-//     console.log(event)
-// })
-
-const mouseControls = new PointerLockControls( camera, document.body );
+const mouseControls = new PointerLockControls(camera, document.body);
 document.addEventListener('mousedown', (event) => {
     mouseControls.lock()
 })
 
 const cameraVec = new THREE.Vector3()
+
 function control() {
-
     camera.getWorldDirection(cameraVec)
-
-    // Controls:Engine 
-    if(controls['w']){ // w
-    camera.position.addScaledVector(cameraVec, player.speed)   
-    //   camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
-    //   camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
+    
+    // cameraVec.x = 0
+    // console.log(cameraVec)
+    
+    if (controls['w']) {
+        camera.position.addScaledVector(cameraVec, player.speed)
     }
-    if(controls['s']){ // s
-    camera.position.addScaledVector(cameraVec, -player.speed)  
-    //   camera.position.x += Math.sin(camera.rotation.y) * player.speed;
-    //   camera.position.z += -Math.cos(camera.rotation.y) * player.speed;
+    if (controls['s']) {
+        camera.position.addScaledVector(cameraVec, -player.speed)
     }
-    if(controls['a']){ // a
+    if (controls['a']) {
         camera.translateX(-player.speed)
-    //   camera.position.x += Math.sin(camera.rotation.y + Math.PI / 2) * player.speed;
-    //   camera.position.z += -Math.cos(camera.rotation.y + Math.PI / 2) * player.speed;
     }
-    if(controls['d']){ // d
+    if (controls['d']) {
         camera.translateX(player.speed)
-    //   camera.position.x += Math.sin(camera.rotation.y - Math.PI / 2) * player.speed;
-    //   camera.position.z += -Math.cos(camera.rotation.y - Math.PI / 2) * player.speed;
     }
-    // if(controls[37]){ // la
-    //   camera.rotation.y -= player.turnSpeed;
-    // }
-    // if(controls[39]){ // ra
-    //   camera.rotation.y += player.turnSpeed;
-    // }
-    if(controls[' ']) { // space
-      if(player.jumps) return false;
-      player.jumps = true;
-      player.velocity = -player.jumpHeight;
+    if (controls[' ']) {
+        if (player.jumps) return false;
+        player.jumps = true;
+        player.velocity = -player.jumpHeight;
     }
 }
 
 const pointer = new THREE.Vector2();
+// pointer.x = window.innerWidth / 2 
+// pointer.y = window.innerHeight / 2 
+
 document.addEventListener('pointermove', (event) => {
-	pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
 })
-
-
-
-
 
 function destroyBlock() {
     const raycaster = new THREE.Raycaster()
-    raycaster.setFromCamera( pointer, camera );
-
-    const intersects = raycaster.intersectObjects( scene.children );
-    scene.remove(intersects[0].object)
-    // for ( let i = 0; i < intersects.length; i ++ ) {
-    //     // if(intersects[i].object.type)
-    //     // console.log(intersects[i].object.)
-    //     scene.remove(intersects[i].object)
-	// }
+    raycaster.setFromCamera(pointer, camera)
+    const intersects = raycaster.intersectObjects(scene.children)
+    if(intersects[0].object.getWorldPosition.x <= 0) {
+        return
+    } else {
+        scene.remove(intersects[0].object)
+    }
 }
 
 document.addEventListener('keypress', (event) => {
-    if(event.key == 1) {
-        currentBlockType = 0
+    if (event.key == 1) {
+        selectedHotbarSlot = 0
     }
-    if(event.key == 2) {
-        currentBlockType = 1
+    if (event.key == 2) {
+        selectedHotbarSlot = 1
     }
-    if(event.key == 3) {
-        currentBlockType = 2
+    if (event.key == 3) {
+        selectedHotbarSlot = 2
     }
+    if(event.key == 4) {
+        selectedHotbarSlot = 3
+    }
+    if(event.key == 5) {
+        selectedHotbarSlot = 4
+    }
+    if(event.key == 6) {
+        selectedHotbarSlot = 5
+    }
+    if(event.key == 7) {
+        selectedHotbarSlot = 6
+    }
+    if(event.key == 8) {
+        selectedHotbarSlot = 7
+    }
+    if(event.key == 95) {
+        selectedHotbarSlot = 8
+    }
+    
 })
 
-let currentBlockType = 0
+const blockList = {}
+const placedBlocks = []
+
+class Block {
+    constructor(blockName) {
+        const texture = new THREE.TextureLoader().load(`./assets/textures/blocks/${blockName}.png`);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 1);
+
+        this.name = blockName
+        this.blockGeometry = new THREE.BoxGeometry(1, 1, 1);
+        this.blockMat = new THREE.MeshPhongMaterial({
+            color: "white",
+            wireframe: false,
+            transparent: true
+        });
+        this.blockMat.map = texture
+        blockList[blockName] = this
+    }
+
+    place(cords) {
+        let newBox = new THREE.Mesh(this.blockGeometry, this.blockMat);
+        newBox.position.x = Math.round(cords.x)
+        newBox.position.y = Math.round(cords.y) + 0.5
+        newBox.position.z = Math.round(cords.z)
+        // console.log(newBox.position)
+        newBox.receiveShadow = true;
+        newBox.castShadow = true;
+        placedBlocks.push(newBox)
+        console.log(newBox)
+        scene.add(newBox);
+    }
+}
+
+function initBlocks() {
+    new Block('bricks')
+    new Block('stone')
+    new Block('planks')
+    new Block('stoneBricks')
+    new Block('glass')
+}
+
+initBlocks()
+
+let selectedHotbarSlot = 0
+
+// function setBlock(cords, type) {
+//     const texture_ = new THREE.TextureLoader().load(`./assets/textures/${type}.png`);
+//     texture_.wrapS = THREE.RepeatWrapping;
+//     texture_.wrapT = THREE.RepeatWrapping;
+//     texture_.repeat.set(1, 1);
+
+//     let blockGeometry = new THREE.BoxGeometry(1, 1, 1);
+//     let blockMat = new THREE.MeshPhongMaterial({
+//         color: "white",
+//         wireframe: false
+//     });
+//     blockMat.map = texture_
+//     let newBox = new THREE.Mesh(blockGeometry, blockMat);
+
+//     newBox.position.y = Number((cords.y).toFixed(0)) + 0.5;
+//     newBox.position.x = Number((cords.x).toFixed(0));
+//     newBox.position.z = Number((cords.z).toFixed(0));
+//     newBox.receiveShadow = true;
+//     newBox.castShadow = true;
+
+//     scene.add(newBox);
+// }
+
+
+
 function placeBlock() {
     const raycaster = new THREE.Raycaster()
-    raycaster.setFromCamera( pointer, camera );
-    let currentBlock = '' 
-    switch(currentBlockType) {
+    raycaster.setFromCamera(pointer, camera);
+    let currentBlock = ''
+    switch (selectedHotbarSlot) {
         case 0:
             currentBlock = 'bricks'
             break
@@ -242,21 +307,24 @@ function placeBlock() {
         case 2:
             currentBlock = 'stone'
             break
+        case 3:
+            currentBlock = 'stoneBricks'
+            break
+        case 4:
+            currentBlock = 'glass'
+            break
     }
 
-    const intersects = raycaster.intersectObjects( scene.children );
-    for ( let i = 0; i < intersects.length; i ++ ) {
-        // console.log(intersects[i].point)
-        setBlock(intersects[i].point, currentBlock)
-		// intersects[ i ].object.material.color.set( 0xff0000 );
-	} 
+    const intersects = raycaster.intersectObjects(scene.children);
+    if(intersects[0].distance > 4.5) return
+    blockList[currentBlock].place(intersects[0].point)
+
 }
 
 document.addEventListener('mousedown', (event) => {
-    // console.log(event)
-    if(event.buttons == '1') {
+    if (event.buttons == '2') {
         placeBlock()
-    } else if(event.buttons == '2') {
+    } else if (event.buttons == '1') {
         destroyBlock()
     }
 })
@@ -265,7 +333,7 @@ function ixMovementUpdate() {
     player.velocity += player.gravity;
     camera.position.y -= player.velocity;
 
-    if(camera.position.y < player.height) {
+    if (camera.position.y < player.height) {
         camera.position.y = player.height;
         player.jumps = false;
     }
@@ -274,13 +342,13 @@ function ixMovementUpdate() {
 window.addEventListener('resize', () => {
     let w = window.innerWidth,
         h = window.innerHeight;
-    
+
     renderer.setSize(w, h);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
 });
 
-// TODO potem
+// TODO potem ładowanie modeli
 // const loader = new GLTFLoader();
 
 // loader.load('./assets/scene.gltf', function (gltf) {
@@ -291,11 +359,11 @@ window.addEventListener('resize', () => {
 
 function animate() {
     requestAnimationFrame(animate);
-    // cube.rotation.x += 0.01;
-    // cube.rotation.y += 0.01;
     control();
     ixMovementUpdate();
-    renderer.render(backgroundScene , backgroundCamera );
+    renderer.render(backgroundScene, backgroundCamera);
     renderer.render(scene, camera);
 }
-animate();
+// animate();
+
+setInterval(animate(), 16.67)

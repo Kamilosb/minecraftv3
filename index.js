@@ -52,7 +52,7 @@ let player = {
     jumpHeight: .15,
     gravity: .005,
     velocity: 0,
-
+    width: 0.8,
     playerJumps: false
 }
 
@@ -63,43 +63,42 @@ brickTexture.wrapS = THREE.RepeatWrapping;
 brickTexture.wrapT = THREE.RepeatWrapping;
 brickTexture.repeat.set(45, 45);
 
-const planksTexture = new THREE.TextureLoader().load("./assets/textures/planks.png");
-planksTexture.wrapS = THREE.RepeatWrapping;
-planksTexture.wrapT = THREE.RepeatWrapping;
-planksTexture.repeat.set(1, 1);
+// const planksTexture = new THREE.TextureLoader().load("./assets/textures/planks.png");
+// planksTexture.wrapS = THREE.RepeatWrapping;
+// planksTexture.wrapT = THREE.RepeatWrapping;
+// planksTexture.repeat.set(1, 1);
 
-// const fpHanlder = new FirstPersonControls(camera, renderer.domElement)
 camera.position.set(0, player.height, -5);
 camera.lookAt(new THREE.Vector3(0, player.height, 0));
 
 // Object:Box1
-let BoxGeometry1 = new THREE.BoxGeometry(1, 1, 1);
-let BoxMaterial1 = new THREE.MeshBasicMaterial({
-    color: "blue",
-    wireframe: false
-});
-// BoxMaterial1.map = brickTexture
-let Box1 = new THREE.Mesh(BoxGeometry1, BoxMaterial1);
+// let BoxGeometry1 = new THREE.BoxGeometry(1, 1, 1);
+// let BoxMaterial1 = new THREE.MeshBasicMaterial({
+//     color: "blue",
+//     wireframe: false
+// });
+// // BoxMaterial1.map = brickTexture
+// let Box1 = new THREE.Mesh(BoxGeometry1, BoxMaterial1);
 
-Box1.position.y = 3;
-Box1.scale.x = Box1.scale.y = Box1.scale.z = .25;
-scene.add(Box1);
+// Box1.position.y = 3;
+// Box1.scale.x = Box1.scale.y = Box1.scale.z = .25;
+// scene.add(Box1);
 
 // Object:Box2
-let BoxGeometry2 = new THREE.BoxGeometry(1, 1, 1);
-let BoxMaterial2 = new THREE.MeshPhongMaterial({
-    color: "white",
-    wireframe: false
-});
-BoxMaterial2.map = planksTexture
-let Box2 = new THREE.Mesh(BoxGeometry2, BoxMaterial2);
+// let BoxGeometry2 = new THREE.BoxGeometry(1, 1, 1);
+// let BoxMaterial2 = new THREE.MeshPhongMaterial({
+//     color: "white",
+//     wireframe: false
+// });
+// BoxMaterial2.map = planksTexture
+// let Box2 = new THREE.Mesh(BoxGeometry2, BoxMaterial2);
 
-Box2.position.y = 0.5;
-Box2.position.x = 0;
-Box2.receiveShadow = true;
-Box2.castShadow = true;
+// Box2.position.y = 0.5;
+// Box2.position.x = 0;
+// Box2.receiveShadow = true;
+// Box2.castShadow = true;
 
-scene.add(Box2);
+// scene.add(Box2);
 
 let PlaneGeometry1 = new THREE.PlaneGeometry(10, 10);
 let PlaneMaterial1 = new THREE.MeshPhongMaterial({
@@ -113,6 +112,7 @@ Plane1.rotation.x -= Math.PI / 2;
 Plane1.scale.x = 3;
 Plane1.scale.y = 3;
 Plane1.receiveShadow = true;
+Plane1.name = 'floor'
 scene.add(Plane1);
 
 // let light1 = new THREE.PointLight("white", .8);
@@ -171,8 +171,6 @@ function control() {
 }
 
 const pointer = new THREE.Vector2();
-// pointer.x = window.innerWidth / 2 
-// pointer.y = window.innerHeight / 2 
 
 document.addEventListener('pointermove', (event) => {
     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -183,11 +181,12 @@ function destroyBlock() {
     const raycaster = new THREE.Raycaster()
     raycaster.setFromCamera(pointer, camera)
     const intersects = raycaster.intersectObjects(scene.children)
-    if(intersects[0].object.getWorldPosition.x <= 0) {
-        return
-    } else {
-        scene.remove(intersects[0].object)
-    }
+
+    if(intersects[0].object.name == 'floor') return
+    if(intersects[0].object.getWorldPosition.x <= 0) return
+
+    scene.remove(intersects[0].object)
+
 }
 
 document.addEventListener('keypress', (event) => {
@@ -215,10 +214,12 @@ document.addEventListener('keypress', (event) => {
     if(event.key == 8) {
         selectedHotbarSlot = 7
     }
-    if(event.key == 95) {
+    if(event.key == 9) {
         selectedHotbarSlot = 8
     }
-    
+    if(event.key == 'g') {
+        CheckForCollision()
+    }
 })
 
 const blockList = {}
@@ -250,8 +251,9 @@ class Block {
         // console.log(newBox.position)
         newBox.receiveShadow = true;
         newBox.castShadow = true;
+        newBox.name = this.name
         placedBlocks.push(newBox)
-        console.log(newBox)
+        // console.log(newBox)
         scene.add(newBox);
     }
 }
@@ -262,36 +264,12 @@ function initBlocks() {
     new Block('planks')
     new Block('stoneBricks')
     new Block('glass')
+    new Block('dirt')
 }
 
 initBlocks()
 
 let selectedHotbarSlot = 0
-
-// function setBlock(cords, type) {
-//     const texture_ = new THREE.TextureLoader().load(`./assets/textures/${type}.png`);
-//     texture_.wrapS = THREE.RepeatWrapping;
-//     texture_.wrapT = THREE.RepeatWrapping;
-//     texture_.repeat.set(1, 1);
-
-//     let blockGeometry = new THREE.BoxGeometry(1, 1, 1);
-//     let blockMat = new THREE.MeshPhongMaterial({
-//         color: "white",
-//         wireframe: false
-//     });
-//     blockMat.map = texture_
-//     let newBox = new THREE.Mesh(blockGeometry, blockMat);
-
-//     newBox.position.y = Number((cords.y).toFixed(0)) + 0.5;
-//     newBox.position.x = Number((cords.x).toFixed(0));
-//     newBox.position.z = Number((cords.z).toFixed(0));
-//     newBox.receiveShadow = true;
-//     newBox.castShadow = true;
-
-//     scene.add(newBox);
-// }
-
-
 
 function placeBlock() {
     const raycaster = new THREE.Raycaster()
@@ -313,11 +291,25 @@ function placeBlock() {
         case 4:
             currentBlock = 'glass'
             break
+        case 5:
+            currentBlock = 'dirt'
+            break
     }
 
     const intersects = raycaster.intersectObjects(scene.children);
+    if(!intersects[0]) return
     if(intersects[0].distance > 4.5) return
     blockList[currentBlock].place(intersects[0].point)
+}
+
+function CheckForCollision() {
+    const camVec = new THREE.Vector3()
+    const raycaster = new THREE.Raycaster()
+
+    camera.getWorldDirection(camVec)
+    raycaster.set(camera.position, camVec)
+    const intersects = raycaster.intersectObjects(scene.children)
+    console.log(camVec)
 
 }
 
@@ -349,13 +341,31 @@ window.addEventListener('resize', () => {
 });
 
 // TODO potem ładowanie modeli
-// const loader = new GLTFLoader();
+const loader = new GLTFLoader();
+let tree = {}
 
-// loader.load('./assets/scene.gltf', function (gltf) {
-//     scene.add(gltf.scene);
-// }, undefined, function (error) {
-//     console.error(error);
-// });
+
+
+loader.load('./assets/models/maple_tree.glb', function (gltf) {
+    // console.log()
+    // gltf.scene.position = 3
+    // tree = gltf.scene
+    scene.add(gltf.scene);
+    tree = gltf.scene
+    // tree.position.y = 11
+    tree.scale.x = 0.01
+    tree.scale.y = 0.01
+    tree.scale.z = 0.01
+    tree.receiveShadow = true
+    tree.transparent = true
+    console.log(tree)
+}, undefined, function (error) {
+    console.error(error);
+});
+// tree.position.y = 11
+// setInterval(() => {
+//     // console.log(camera.position)
+// }, 500)
 
 function animate() {
     requestAnimationFrame(animate);

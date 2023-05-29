@@ -357,7 +357,7 @@ loader.load('./assets/models/maple_tree.glb', function (gltf) {
     tree.scale.y = 0.01
     tree.scale.z = 0.01
     tree.receiveShadow = true
-    tree.transparent = true
+    // tree.transparent = true
     console.log(tree)
 }, undefined, function (error) {
     console.error(error);

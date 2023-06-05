@@ -17,7 +17,6 @@ const scene = new THREE.Scene();
 const textureBack = new THREE.TextureLoader().load("./assets/textures/sky.jpg");
 scene.background = textureBack
 
-
 // const gui = new GUI()
 // const camFolder = gui.addFolder('Camera')
 // camFolder.add(camera.position, 'z', 0, 10)
@@ -49,7 +48,7 @@ let player = {
     height: 1.80,
     turnSpeed: .1,
     speed: .1,
-    jumpHeight: .15,
+    jumpHeight: .125,
     gravity: .005,
     velocity: 0,
     width: 0.8,
@@ -130,12 +129,12 @@ let controls = {};
 document.addEventListener('keydown', ({
     key
 }) => {
-    controls[key] = true
+    controls[key.toLowerCase()] = true
 });
 document.addEventListener('keyup', ({
     key
 }) => {
-    controls[key] = false
+    controls[key.toLowerCase()] = false
 });
 
 const mouseControls = new PointerLockControls(camera, document.body);
@@ -146,16 +145,23 @@ document.addEventListener('mousedown', (event) => {
 const cameraVec = new THREE.Vector3()
 
 function control() {
-    camera.getWorldDirection(cameraVec)
-    
-    // cameraVec.x = 0
-    // console.log(cameraVec)
-    
+    // console.log(player.speed)
+    console.log(controls)
     if (controls['w']) {
-        camera.position.addScaledVector(cameraVec, player.speed)
+        // camera.position.addScaledVector(cameraVec, player.speed)
+        // if (player.jumps) {
+        //     camera.translateZ(-player.speed)
+        //     // camera.translateY(player.speed)
+        //     return
+        // }
+        camera.translateY(player.speed)
+        camera.translateZ(-player.speed)
+
     }
     if (controls['s']) {
-        camera.position.addScaledVector(cameraVec, -player.speed)
+        // camera.position.addScaledVector(cameraVec, -player.speed)
+        camera.translateZ(player.speed)
+        camera.translateY(-player.speed)
     }
     if (controls['a']) {
         camera.translateX(-player.speed)
@@ -168,6 +174,9 @@ function control() {
         player.jumps = true;
         player.velocity = -player.jumpHeight;
     }
+    // if (controls['shift']) {
+    //     player.speed /= 2
+    // }
 }
 
 const pointer = new THREE.Vector2();
@@ -248,12 +257,10 @@ class Block {
         newBox.position.x = Math.round(cords.x)
         newBox.position.y = Math.round(cords.y) + 0.5
         newBox.position.z = Math.round(cords.z)
-        // console.log(newBox.position)
         newBox.receiveShadow = true;
         newBox.castShadow = true;
         newBox.name = this.name
         placedBlocks.push(newBox)
-        // console.log(newBox)
         scene.add(newBox);
     }
 }
@@ -266,7 +273,6 @@ function initBlocks() {
     new Block('glass')
     new Block('dirt')
 }
-
 initBlocks()
 
 let selectedHotbarSlot = 0
@@ -302,16 +308,52 @@ function placeBlock() {
     blockList[currentBlock].place(intersects[0].point)
 }
 
-function CheckForCollision() {
-    const camVec = new THREE.Vector3()
-    const raycaster = new THREE.Raycaster()
+// function CheckForCollision() {
+//     // const camVec = new THREE.Vector3()
+//     // const raycaster = new THREE.Raycaster()
 
-    camera.getWorldDirection(camVec)
-    raycaster.set(camera.position, camVec)
-    const intersects = raycaster.intersectObjects(scene.children)
-    console.log(camVec)
+//     // camera.getWorldDirection(camVec)
+//     // raycaster.set(camera.position, camVec)
+//     // const intersects = raycaster.intersectObjects(scene.children)
+//     // console.log(camVec)
+// }
 
-}
+// Setup our world
+// var world = new CANNON.World();
+// world.gravity.set(0, 0, -9.82); // m/s²
+
+// // Create a sphere
+// var radius = 1; // m
+// var sphereBody = new CANNON.Body({
+//    mass: 5, // kg
+//    position: new CANNON.Vec3(0, 0, 10), // m
+//    shape: new CANNON.Sphere(radius)
+// });
+// world.addBody(sphereBody);
+
+// // Create a plane
+// var groundBody = new CANNON.Body({
+//     mass: 0 // mass == 0 makes the body static
+// });
+// var groundShape = new CANNON.Plane();
+// groundBody.addShape(groundShape);
+// world.addBody(groundBody);
+
+// var fixedTimeStep = 1.0 / 60.0; // seconds
+// var maxSubSteps = 3;
+
+// // Start the simulation loop
+// var lastTime;
+// (function simloop(time){
+//   requestAnimationFrame(simloop);
+//   if(lastTime !== undefined){
+//      var dt = (time - lastTime) / 1000;
+//      world.step(fixedTimeStep, dt, maxSubSteps);
+//   }
+//   console.log("Sphere z position: " + sphereBody.position.z);
+//   lastTime = time;
+// })();
+
 
 document.addEventListener('mousedown', (event) => {
     if (event.buttons == '2') {
@@ -324,7 +366,7 @@ document.addEventListener('mousedown', (event) => {
 function ixMovementUpdate() {
     player.velocity += player.gravity;
     camera.position.y -= player.velocity;
-
+    
     if (camera.position.y < player.height) {
         camera.position.y = player.height;
         player.jumps = false;
@@ -341,27 +383,25 @@ window.addEventListener('resize', () => {
 });
 
 // TODO potem ładowanie modeli
-const loader = new GLTFLoader();
-let tree = {}
+// const loader = new GLTFLoader();
+// let tree = {}
 
-
-
-loader.load('./assets/models/maple_tree.glb', function (gltf) {
-    // console.log()
-    // gltf.scene.position = 3
-    // tree = gltf.scene
-    scene.add(gltf.scene);
-    tree = gltf.scene
-    // tree.position.y = 11
-    tree.scale.x = 0.01
-    tree.scale.y = 0.01
-    tree.scale.z = 0.01
-    tree.receiveShadow = true
-    // tree.transparent = true
-    console.log(tree)
-}, undefined, function (error) {
-    console.error(error);
-});
+// loader.load('./assets/models/maple_tree.glb', function (gltf) {
+//     // console.log()
+//     // gltf.scene.position = 3
+//     // tree = gltf.scene
+//     scene.add(gltf.scene);
+//     tree = gltf.scene
+//     // tree.position.y = 11
+//     tree.scale.x = 0.01
+//     tree.scale.y = 0.01
+//     tree.scale.z = 0.01
+//     tree.receiveShadow = true
+//     // tree.transparent = true
+//     console.log(tree)
+// }, undefined, function (error) {
+//     console.error(error);
+// });
 // tree.position.y = 11
 // setInterval(() => {
 //     // console.log(camera.position)
@@ -374,6 +414,5 @@ function animate() {
     renderer.render(backgroundScene, backgroundCamera);
     renderer.render(scene, camera);
 }
-// animate();
 
 setInterval(animate(), 16.67)
